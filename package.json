@@ -2,6 +2,10 @@
   "name": "alerts-poll-bot",
   "version": "1.0.0",
   "main": "src/index.js",
+  "engines": {
+    "node": "22.14.0",
+    "npm": "10.9.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
