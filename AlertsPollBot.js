@@ -28,14 +28,15 @@ const log = (level, message, data = null) => {
 };
 
 // Configuration
-const GROUP_ID = process.env.GROUP_ID;
+const ON_GROUP_MARKER = process.env.ON_GROUP_MARKER || "alerts-poll-bot-on";
+const OFF_GROUP_MARKER = process.env.OFF_GROUP_MARKER || "alerts-poll-bot-off";
 const CITY_NAME = process.env.CITY_NAME;
 const POLL_INTERVAL_MINUTES = parseInt(process.env.POLL_INTERVAL_MINUTES || "15");
 const AUTH_FOLDER = process.env.AUTH_FOLDER || 'auth_info';
 const ALERT_CHECK_INTERVAL_MS = parseInt(process.env.ALERT_CHECK_INTERVAL_MS || "15000");
 
-// Last time the poll was sent
-let lastTimeSent = dayjs(0);
+let targetGroupIds = new Set([]);  // Will be populated after finding the group
+let lastTimeSent = dayjs(0);  // Last time the poll was sent
 
 // This async function starts the bot
 async function startBot(){
@@ -90,6 +91,24 @@ async function startBot(){
             setTimeout(() => startBot(), 10000);
         });
 
+        sock.ev.on('messages.upsert', async (messageUpdate) => {
+            for (const message of messageUpdate.messages) {
+                // Only process messages sent by the active user to groups
+                if (message.key.fromMe && message.key.remoteJid.endsWith('@g.us')) {
+                    const messageContent = message.message?.conversation || message.message?.extendedTextMessage?.text;
+                    const groupId = message.key.remoteJid;
+                    if (ON_GROUP_MARKER === messageContent && !targetGroupIds.has(groupId)) {
+                        log(LOG_LEVELS.INFO, 'Found ON marker in some group. Activating bot for it.');
+                        targetGroupIds.add(groupId);
+                    }
+                    else if (OFF_GROUP_MARKER === messageContent && targetGroupIds.has(groupId)) {
+                        log(LOG_LEVELS.INFO, 'Found OFF marker in some controlled group. Deactivating bot for it.');
+                        targetGroupIds.delete(groupId);
+                    }
+                }
+            }
+        });
+
     } catch (error) {
         log(LOG_LEVELS.ERROR, "Failed to start the bot", error);
         log(LOG_LEVELS.INFO, "Attempting to restart in 5 seconds...");
@@ -100,14 +119,18 @@ async function startBot(){
 async function managePollSending(sock) {
     try {
         while (true) {
-            const now = dayjs();
-            
-            if (await shouldSendPoll(now, lastTimeSent)) {
-                log(LOG_LEVELS.INFO, `Sending poll at: ${now.format('DD-MM-YYYY HH:mm:ss')}`);
-                await sendPoll(sock, GROUP_ID);
-                lastTimeSent = now;
+            if (targetGroupIds.size !== 0) {
+                const now = dayjs();
+                
+                if (await shouldSendPoll(now, lastTimeSent)) {
+                    log(LOG_LEVELS.INFO, `Sending poll at: ${now.format('DD-MM-YYYY HH:mm:ss')}`);
+                    await sendPoll(sock);
+                    lastTimeSent = now;
+                }
             }
-
+            else {
+                log(LOG_LEVELS.INFO, 'No active groups found. Waiting for activation...');
+            }
             await new Promise(r => setTimeout(r, ALERT_CHECK_INTERVAL_MS));
         }
     } catch (error) {
@@ -117,12 +140,7 @@ async function managePollSending(sock) {
     }
 }
 
-async function sendPoll(sock, groupId) {
-    if (!groupId || !groupId.endsWith('@g.us')) {
-        log(LOG_LEVELS.ERROR, `Invalid group ID: ${groupId}`);
-        return false;
-    }
-
+async function sendPoll(sock) {
     const pollMessage = {
         poll: {
             name: "האם כולם באיזור בטוח?",
@@ -131,14 +149,17 @@ async function sendPoll(sock, groupId) {
             toAnnouncementGroup: true
         }
     };
-
-    try {
-        await sock.sendMessage(groupId, pollMessage);
-        log(LOG_LEVELS.SUCCESS, 'Poll sent successfully!');
-        return true;
-    } catch (error) {
-        log(LOG_LEVELS.ERROR, 'Failed to send poll:', error);
-        return false;
+    
+    let i = 0;
+    for (const groupId of targetGroupIds) {
+        try {
+            await sock.sendMessage(groupId, pollMessage);
+            log(LOG_LEVELS.SUCCESS, `[${++i}\\${targetGroupIds.size}] Poll sent successfully!`);
+            return true;
+        } catch (error) {
+            log(LOG_LEVELS.ERROR, `[${++i}\\${targetGroupIds.size}] Failed to send poll:`, error);
+            return false;
+        }
     }
 }
 
