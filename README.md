@@ -84,7 +84,7 @@ Alerts Poll Bot is a WhatsApp automation tool that monitors Pikud HaOref (Israel
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| CITY_NAME | The city to monitor for alerts | (Required) |
+| CITY_NAME | The city to monitor for alerts - note that the city name must be written the same way as it is written in Pikud HaOref (Hebrew words with spaces between them) | (Required) |
 | AUTH_FOLDER | Path to store WhatsApp authentication data | auth_info |
 | ALERT_CHECK_INTERVAL_MS | Milliseconds between alert checks | 15000 |
 | POLL_INTERVAL_MINUTES | Minimum minutes between polls to prevent spam | 15 |
