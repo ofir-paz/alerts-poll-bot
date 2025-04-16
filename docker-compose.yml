@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  alerts-poll-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alerts-poll-bot
+    environment:
+      - CITY_NAME=פתח תקווה
+      - AUTH_FOLDER=auth_info
+      - ALERT_CHECK_INTERVAL_MS=20000
+      - POLL_INTERVAL_MINUTES=15
+      - ON_GROUP_MARKER=bot-on
+      - OFF_GROUP_MARKER=bot-off
+    volumes:
+      - ./auth_info:/app/auth_info
+    restart: unless-stopped
