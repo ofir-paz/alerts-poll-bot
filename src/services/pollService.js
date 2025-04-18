@@ -38,10 +38,10 @@ async function shouldSendPoll(currentTime, lastTimeSent) {
         const isEnoughTimePassed = currentTime.diff(lastTimeSent, "minute", true) >= config.POLL_INTERVAL_MINUTES;
         
         if (isEnoughTimePassed) {
-            const timeToCheck = currentTime.clone().subtract(1, "minute");
-            const alertsInCity = await checkIfAlertByHistoric(config.CITY_NAME, timeToCheck, 1);
+            const timeToCheck = currentTime.clone().subtract(2, "minute");
+            const alertsInCity = await checkIfAlertByHistoric(config.CITY_NAME, timeToCheck, 2);
 
-            // Check if there are alerts in the city within the last 1 minute
+            // Check if there are alerts in the city within the last 4 minute
             if (alertsInCity.length > 0) {
                 log(LOG_LEVELS.INFO, `Alert found in city: ${JSON.stringify(alertsInCity[0])}`);
                 return true;

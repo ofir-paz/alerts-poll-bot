@@ -11,13 +11,13 @@ module.exports = {
     
     // Alert configuration
     CITY_NAME: process.env.CITY_NAME,
-    ALERT_CHECK_INTERVAL_MS: parseInt(process.env.ALERT_CHECK_INTERVAL_MS || "15000"),
+    ALERT_CHECK_INTERVAL_MS: parseInt(process.env.ALERT_CHECK_INTERVAL_MS || "20000"),
     ALERT_API_URL: "https://www.oref.org.il/warningMessages/alert/History/AlertsHistory.json",
     ALERT_API_REFERER: "https://www.oref.org.il/heb",
-    ALERT_API_TIMEOUT_MS: 5000,
+    ALERT_API_TIMEOUT_MS: 20000,
     
     // Poll configuration
-    POLL_INTERVAL_MINUTES: parseInt(process.env.POLL_INTERVAL_MINUTES || "15"),
+    POLL_INTERVAL_MINUTES: parseInt(process.env.POLL_INTERVAL_MINUTES || "10"),
     POLL_OPTIONS: ["כן", "בדרך", "לא"],
     POLL_QUESTION: "האם כולם באיזור בטוח?"
 };
