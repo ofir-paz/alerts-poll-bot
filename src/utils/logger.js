@@ -6,7 +6,7 @@ const LOG_LEVELS = {
 };
 
 function log(level, message, data = null) {
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
     const prefix = level.prefix;
     
     console.log(`[${timestamp}] ${prefix} | ${message}`);
