@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('baileys');
 const { log, LOG_LEVELS } = require('../utils/logger');
 const config = require('../config');
 const { setupMessageHandler } = require('./messageHandler');
