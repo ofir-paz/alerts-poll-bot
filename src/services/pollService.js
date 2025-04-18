@@ -65,7 +65,7 @@ async function managePollSending(sock) {
             if (targetGroupIds.size !== 0) {
                 const now = dayjs();
                 
-                if (true || await shouldSendPoll(now, lastTimeSent)) {
+                if (await shouldSendPoll(now, lastTimeSent)) {
                     log(LOG_LEVELS.INFO, `Sending poll at: ${now.format('DD-MM-YYYY HH:mm:ss')}`);
                     await sendPoll(sock);
                     lastTimeSent = now;
