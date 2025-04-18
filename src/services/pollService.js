@@ -21,15 +21,13 @@ function createPoll() {
 async function sendPoll(sock) {
     const pollMessage = createPoll();
     
-    let i = 0;
+    let i = 1;
     for (const groupId of targetGroupIds) {
         try {
             await sock.sendMessage(groupId, pollMessage);
-            log(LOG_LEVELS.SUCCESS, `[${++i}\\${targetGroupIds.size}] Poll sent successfully!`);
-            return true;
+            log(LOG_LEVELS.SUCCESS, `[${i++}\\${targetGroupIds.size}] Poll sent successfully!`);
         } catch (error) {
-            log(LOG_LEVELS.ERROR, `[${++i}\\${targetGroupIds.size}] Failed to send poll:`, error);
-            return false;
+            log(LOG_LEVELS.ERROR, `[${i++}\\${targetGroupIds.size}] Failed to send poll:`, error);
         }
     }
 }
@@ -49,7 +47,8 @@ async function shouldSendPoll(currentTime, lastTimeSent) {
                 return true;
             }
             else {
-                log(LOG_LEVELS.INFO, `No alerts found in ${config.CITY_NAME} within the last minutes.`);
+                // For debugging purposes
+                // log(LOG_LEVELS.INFO, `No alerts found in ${config.CITY_NAME} within the last minutes.`);
             }
         }
 
@@ -66,7 +65,7 @@ async function managePollSending(sock) {
             if (targetGroupIds.size !== 0) {
                 const now = dayjs();
                 
-                if (await shouldSendPoll(now, lastTimeSent)) {
+                if (true || await shouldSendPoll(now, lastTimeSent)) {
                     log(LOG_LEVELS.INFO, `Sending poll at: ${now.format('DD-MM-YYYY HH:mm:ss')}`);
                     await sendPoll(sock);
                     lastTimeSent = now;
